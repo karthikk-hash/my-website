@@ -1,10 +1,365 @@
-<!DOCTYPE html>
-<html>
+﻿<!DOCTYPE html>
+<html lang="en">
 <head>
-  <title>My First Website</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Expense Sketch</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-1: #f3efe7;
+      --bg-2: #e4efe5;
+      --ink: #141414;
+      --muted: #5c5c5c;
+      --accent: #0f766e;
+      --accent-2: #d97706;
+      --card: #ffffff;
+      --line: #d6d1c7;
+      --shadow: 0 20px 60px rgba(20, 20, 20, 0.12);
+      --radius: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Space Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(1200px 600px at 10% 10%, #f9f5ee 0%, transparent 60%),
+        radial-gradient(900px 500px at 90% 20%, #e6f1ef 0%, transparent 65%),
+        linear-gradient(160deg, var(--bg-1), var(--bg-2));
+    }
+
+    .page {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 40px 20px 80px;
+      display: grid;
+      gap: 28px;
+    }
+
+    header {
+      display: grid;
+      gap: 12px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(255, 255, 255, 0.7);
+      border: 1px solid var(--line);
+      padding: 10px 16px;
+      border-radius: 999px;
+      width: fit-content;
+      box-shadow: 0 8px 20px rgba(20, 20, 20, 0.06);
+    }
+
+    .brand-dot {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: conic-gradient(from 210deg, var(--accent), #22c55e, var(--accent-2));
+      display: grid;
+      place-items: center;
+      color: white;
+      font-weight: 700;
+      font-size: 0.9rem;
+      font-family: "Fraunces", serif;
+    }
+
+    h1 {
+      font-family: "Fraunces", serif;
+      font-size: clamp(2.3rem, 4vw, 3.5rem);
+      margin: 0;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 1.05rem;
+      max-width: 60ch;
+    }
+
+    .grid {
+      display: grid;
+      gap: 24px;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 22px;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(20, 20, 20, 0.06);
+    }
+
+    .balance {
+      display: grid;
+      gap: 16px;
+      background: linear-gradient(135deg, rgba(15, 118, 110, 0.12), rgba(217, 119, 6, 0.08));
+      border: 1px solid rgba(15, 118, 110, 0.18);
+    }
+
+    .balance h2 {
+      margin: 0;
+      font-size: 1.2rem;
+      color: var(--muted);
+    }
+
+    .balance .amount {
+      font-size: 2.4rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    .pill-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: white;
+      font-size: 0.95rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pill strong {
+      font-weight: 600;
+    }
+
+    .form {
+      display: grid;
+      gap: 16px;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+      font-size: 0.95rem;
+    }
+
+    .field input,
+    .field select {
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      font-size: 1rem;
+      background: #fcfbf9;
+    }
+
+    .cta {
+      border: none;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-weight: 600;
+      background: var(--accent);
+      color: white;
+      cursor: pointer;
+      transition: transform 180ms ease, box-shadow 180ms ease;
+      box-shadow: 0 10px 30px rgba(15, 118, 110, 0.2);
+    }
+
+    .cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 34px rgba(15, 118, 110, 0.28);
+    }
+
+    .list {
+      display: grid;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: #fbfaf6;
+    }
+
+    .item span {
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .tag {
+      background: rgba(15, 118, 110, 0.12);
+      color: var(--accent);
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .chart {
+      height: 180px;
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      align-items: end;
+      gap: 10px;
+    }
+
+    .bar {
+      background: linear-gradient(180deg, rgba(15, 118, 110, 0.7), rgba(15, 118, 110, 0.18));
+      border-radius: 12px 12px 6px 6px;
+      position: relative;
+    }
+
+    .bar::after {
+      content: attr(data-day);
+      position: absolute;
+      bottom: -24px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      border-top: 1px solid var(--line);
+      padding-top: 18px;
+    }
+
+    .reveal {
+      animation: fadeUp 700ms ease forwards;
+      opacity: 0;
+    }
+
+    .delay-1 { animation-delay: 100ms; }
+    .delay-2 { animation-delay: 220ms; }
+    .delay-3 { animation-delay: 340ms; }
+
+    @keyframes fadeUp {
+      from { transform: translateY(10px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    @media (max-width: 700px) {
+      .balance .amount {
+        font-size: 2rem;
+      }
+
+      .footer {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
 </head>
 <body>
-  <h1>Hello World 🚀</h1>
-  <p>This is my first website.</p>
+  <div class="page">
+    <header class="reveal">
+      <div class="brand">
+        <div class="brand-dot">$</div>
+        <strong>Expense Sketch</strong>
+      </div>
+      <h1>Track the tiny wins that keep your budget calm.</h1>
+      <p class="subtitle">A simple expense dashboard for quick snapshots, recent activity, and gentle nudges. Add expenses, watch the week, and stay intentional.</p>
+    </header>
+
+    <section class="grid">
+      <div class="card balance reveal delay-1">
+        <h2>Available Balance</h2>
+        <div class="amount">$1,248.50</div>
+        <div class="pill-row">
+          <div class="pill"><strong>Income</strong> $3,200.00</div>
+          <div class="pill"><strong>Spent</strong> $1,951.50</div>
+          <div class="pill"><strong>Saved</strong> $180.00</div>
+        </div>
+      </div>
+
+      <div class="card reveal delay-2">
+        <h3>Quick Add</h3>
+        <form class="form">
+          <label class="field">
+            Merchant
+            <input type="text" placeholder="Coffee House" />
+          </label>
+          <label class="field">
+            Amount
+            <input type="number" placeholder="12.50" />
+          </label>
+          <label class="field">
+            Category
+            <select>
+              <option>Food & Drinks</option>
+              <option>Travel</option>
+              <option>Shopping</option>
+              <option>Subscriptions</option>
+            </select>
+          </label>
+          <button type="button" class="cta">Add Expense</button>
+        </form>
+      </div>
+
+      <div class="card reveal delay-3">
+        <h3>Weekly Trend</h3>
+        <div class="chart" aria-hidden="true">
+          <div class="bar" style="height: 30%" data-day="M"></div>
+          <div class="bar" style="height: 55%" data-day="T"></div>
+          <div class="bar" style="height: 40%" data-day="W"></div>
+          <div class="bar" style="height: 70%" data-day="T"></div>
+          <div class="bar" style="height: 65%" data-day="F"></div>
+          <div class="bar" style="height: 45%" data-day="S"></div>
+          <div class="bar" style="height: 35%" data-day="S"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card reveal delay-2">
+      <h3>Recent Expenses</h3>
+      <div class="list">
+        <div class="item">
+          <div>
+            <strong>Metro Grocery</strong>
+            <span>Yesterday · Food & Drinks</span>
+          </div>
+          <div class="tag">-$48.20</div>
+        </div>
+        <div class="item">
+          <div>
+            <strong>Morning Brew</strong>
+            <span>Today · Coffee</span>
+          </div>
+          <div class="tag">-$6.40</div>
+        </div>
+        <div class="item">
+          <div>
+            <strong>Studio Membership</strong>
+            <span>Tuesday · Subscription</span>
+          </div>
+          <div class="tag">-$42.00</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="footer reveal delay-3">
+      <span>Next bill: Streaming · $15.00 · Feb 21</span>
+      <span>Tip: Set a weekly cap for dining to keep savings steady.</span>
+    </div>
+  </div>
 </body>
 </html>
