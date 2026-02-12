@@ -3,77 +3,53 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Expense Sketch</title>
+  <title>PDF Activity Mapper</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <div class="page">
-    <header class="reveal">
-      <div class="brand">
-        <div class="brand-dot">$</div>
-        <strong>Expense Sketch</strong>
-      </div>
-      <h1>Track the tiny wins that keep your budget calm.</h1>
-      <p class="subtitle">A simple expense dashboard for quick snapshots, recent activity, and gentle nudges. Add expenses, watch the week, and stay intentional.</p>
+    <header class="hero">
+      <div class="badge">PDF Activity Mapper</div>
+      <h1>Parse a PDF and turn its content into actionable activities.</h1>
+      <p class="subtitle">Upload a PDF, extract text, and map key phrases into suggested tasks, follow-ups, or reminders.</p>
     </header>
 
-    <section class="grid">
-      <div class="card balance reveal delay-1">
-        <h2>Available Balance</h2>
-        <div class="amount" id="balanceAmount">$1,248.50</div>
-        <div class="pill-row">
-          <div class="pill"><strong>Income</strong> <span id="incomeAmount">$3,200.00</span></div>
-          <div class="pill"><strong>Spent</strong> <span id="spentAmount">$1,951.50</span></div>
-          <div class="pill"><strong>Saved</strong> <span id="savedAmount">$180.00</span></div>
+    <section class="panel">
+      <div class="upload">
+        <div>
+          <h2>Upload PDF</h2>
+          <p class="muted">We parse text locally in your browser. Nothing is uploaded.</p>
         </div>
+        <input type="file" id="pdfInput" accept="application/pdf" />
       </div>
-
-      <div class="card reveal delay-2">
-        <h3>Quick Add</h3>
-        <form class="form" id="expenseForm">
-          <label class="field">
-            Merchant
-            <input type="text" name="merchant" placeholder="Coffee House" required />
-          </label>
-          <label class="field">
-            Amount
-            <input type="number" name="amount" placeholder="12.50" step="0.01" min="0" required />
-          </label>
-          <label class="field">
-            Category
-            <select name="category">
-              <option>Food & Drinks</option>
-              <option>Travel</option>
-              <option>Shopping</option>
-              <option>Subscriptions</option>
-              <option>Wellness</option>
-            </select>
-          </label>
-          <button type="submit" class="cta">Add Expense</button>
-          <p class="helper" id="formHelper">Tip: add 3 daily expenses to see your trend update.</p>
-        </form>
+      <div class="actions">
+        <button id="parseBtn" class="cta" disabled>Parse PDF</button>
+        <button id="clearBtn" class="ghost">Clear</button>
       </div>
+      <p class="helper" id="status">Waiting for a PDF.</p>
+    </section>
 
-      <div class="card reveal delay-3">
-        <h3>Weekly Trend</h3>
-        <div class="chart" id="weeklyChart" aria-hidden="true"></div>
+    <section class="grid">
+      <div class="card">
+        <h3>Extracted Highlights</h3>
+        <div id="highlights" class="stack empty">No highlights yet.</div>
+      </div>
+      <div class="card">
+        <h3>Suggested Activities</h3>
+        <div id="activities" class="stack empty">No activities yet.</div>
       </div>
     </section>
 
-    <section class="card reveal delay-2">
-      <h3>Recent Expenses</h3>
-      <div class="list" id="expenseList"></div>
+    <section class="card">
+      <h3>Raw Text Preview</h3>
+      <pre id="rawText" class="raw">Upload a PDF to see extracted text here.</pre>
     </section>
-
-    <div class="footer reveal delay-3">
-      <span id="nextBill">Next bill: Streaming · $15.00 · Feb 21</span>
-      <span>Tip: Set a weekly cap for dining to keep savings steady.</span>
-    </div>
   </div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.min.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

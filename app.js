@@ -1,92 +1,118 @@
-﻿const expenses = [
-  { merchant: "Metro Grocery", amount: 48.2, category: "Food & Drinks", date: "Yesterday" },
-  { merchant: "Morning Brew", amount: 6.4, category: "Coffee", date: "Today" },
-  { merchant: "Studio Membership", amount: 42.0, category: "Subscription", date: "Tuesday" },
+﻿const pdfInput = document.getElementById("pdfInput");
+const parseBtn = document.getElementById("parseBtn");
+const clearBtn = document.getElementById("clearBtn");
+const statusText = document.getElementById("status");
+const highlightsEl = document.getElementById("highlights");
+const activitiesEl = document.getElementById("activities");
+const rawTextEl = document.getElementById("rawText");
+
+let pdfFile = null;
+
+const keywords = [
+  { key: /meeting|call|sync/i, activity: "Schedule a meeting" },
+  { key: /invoice|payment|due/i, activity: "Follow up on payment" },
+  { key: /deadline|submit|due date/i, activity: "Set a deadline reminder" },
+  { key: /review|approve|sign/i, activity: "Request review/approval" },
+  { key: /deliver|shipment|dispatch/i, activity: "Track delivery status" },
+  { key: /onboarding|training/i, activity: "Plan onboarding/training" },
 ];
 
-const weekly = [30, 55, 40, 70, 65, 45, 35];
-
-const expenseList = document.getElementById("expenseList");
-const weeklyChart = document.getElementById("weeklyChart");
-const expenseForm = document.getElementById("expenseForm");
-const balanceAmount = document.getElementById("balanceAmount");
-const spentAmount = document.getElementById("spentAmount");
-const helper = document.getElementById("formHelper");
-
-function formatMoney(value) {
-  return `$${value.toFixed(2)}`;
+function setStatus(text) {
+  statusText.textContent = text;
 }
 
-function renderExpenses() {
-  expenseList.innerHTML = "";
-  expenses.slice(0, 6).forEach((item) => {
-    const row = document.createElement("div");
-    row.className = "item";
-
-    const left = document.createElement("div");
-    const title = document.createElement("strong");
-    title.textContent = item.merchant;
-    const meta = document.createElement("span");
-    meta.textContent = `${item.date} · ${item.category}`;
-    left.appendChild(title);
-    left.appendChild(meta);
-
-    const amount = document.createElement("div");
-    amount.className = "tag";
-    amount.textContent = `-${formatMoney(item.amount)}`;
-
-    row.appendChild(left);
-    row.appendChild(amount);
-    expenseList.appendChild(row);
-  });
-}
-
-function renderWeekly() {
-  const days = ["M", "T", "W", "T", "F", "S", "S"];
-  weeklyChart.innerHTML = "";
-  weekly.forEach((height, index) => {
-    const bar = document.createElement("div");
-    bar.className = "bar";
-    bar.style.height = `${height}%`;
-    bar.setAttribute("data-day", days[index]);
-    weeklyChart.appendChild(bar);
-  });
-}
-
-function updateTotals() {
-  const spent = expenses.reduce((sum, item) => sum + item.amount, 0);
-  spentAmount.textContent = formatMoney(spent);
-
-  const income = 3200;
-  const balance = income - spent;
-  balanceAmount.textContent = formatMoney(balance);
-}
-
-expenseForm.addEventListener("submit", (event) => {
-  event.preventDefault();
-  const formData = new FormData(expenseForm);
-  const merchant = formData.get("merchant").toString().trim();
-  const amount = Number(formData.get("amount"));
-  const category = formData.get("category");
-
-  if (!merchant || Number.isNaN(amount) || amount <= 0) {
-    helper.textContent = "Add a valid merchant and amount.";
+function setStackContent(element, items, className) {
+  element.innerHTML = "";
+  if (items.length === 0) {
+    element.textContent = "No items detected.";
+    element.classList.add("empty");
     return;
   }
 
-  expenses.unshift({
-    merchant,
-    amount,
-    category,
-    date: "Today",
+  element.classList.remove("empty");
+  items.forEach((item) => {
+    const div = document.createElement("div");
+    div.className = className;
+    div.textContent = item;
+    element.appendChild(div);
+  });
+}
+
+async function extractTextFromPdf(file) {
+  const arrayBuffer = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  let text = "";
+
+  for (let pageNum = 1; pageNum <= pdf.numPages; pageNum += 1) {
+    const page = await pdf.getPage(pageNum);
+    const content = await page.getTextContent();
+    const pageText = content.items.map((item) => item.str).join(" ");
+    text += `${pageText}\n`;
+  }
+
+  return text.trim();
+}
+
+function findHighlights(text) {
+  const sentences = text.split(/(?<=[.!?])\s+/).slice(0, 12);
+  return sentences.filter((sentence) => sentence.length > 20).slice(0, 6);
+}
+
+function suggestActivities(text) {
+  const suggestions = [];
+  keywords.forEach(({ key, activity }) => {
+    if (key.test(text)) {
+      suggestions.push(activity);
+    }
   });
 
-  helper.textContent = "Expense added. Keep the streak!";
-  expenseForm.reset();
-  renderExpenses();
-  updateTotals();
+  if (suggestions.length === 0) {
+    suggestions.push("Create a summary task", "Share with the team");
+  }
+
+  return suggestions;
+}
+
+pdfInput.addEventListener("change", (event) => {
+  const [file] = event.target.files;
+  pdfFile = file || null;
+  parseBtn.disabled = !pdfFile;
+  setStatus(pdfFile ? `Ready to parse: ${pdfFile.name}` : "Waiting for a PDF.");
 });
 
-renderExpenses();
-renderWeekly();
-updateTotals();
+parseBtn.addEventListener("click", async () => {
+  if (!pdfFile) {
+    return;
+  }
+
+  setStatus("Parsing PDF... this can take a few seconds.");
+  parseBtn.disabled = true;
+
+  try {
+    const text = await extractTextFromPdf(pdfFile);
+    rawTextEl.textContent = text || "No text found in the PDF.";
+
+    const highlights = findHighlights(text);
+    const activities = suggestActivities(text);
+
+    setStackContent(highlightsEl, highlights, "chip");
+    setStackContent(activitiesEl, activities, "activity");
+
+    setStatus("Parsing complete. Review highlights and activities.");
+  } catch (error) {
+    setStatus("Failed to parse PDF. Try another file.");
+    rawTextEl.textContent = String(error);
+  } finally {
+    parseBtn.disabled = false;
+  }
+});
+
+clearBtn.addEventListener("click", () => {
+  pdfInput.value = "";
+  pdfFile = null;
+  parseBtn.disabled = true;
+  rawTextEl.textContent = "Upload a PDF to see extracted text here.";
+  setStackContent(highlightsEl, [], "chip");
+  setStackContent(activitiesEl, [], "activity");
+  setStatus("Waiting for a PDF.");
+});
